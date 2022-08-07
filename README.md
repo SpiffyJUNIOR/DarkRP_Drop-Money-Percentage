@@ -1,0 +1,1 @@
+Drop-in module, simply install in addons\darkrpmodification-master\lua\darkrp_modules folder. Configured via the convars darkrp_dropmoney_enable and darkrp_dropmoney_percentage.
