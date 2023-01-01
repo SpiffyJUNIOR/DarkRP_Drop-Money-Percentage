@@ -4,15 +4,31 @@ local CVarDropMoneyPercentage = CreateConVar("darkrp_dropmoney_percentage", 0.20
 local CVarDropMoneyEnable = CreateConVar("darkrp_dropmoney_enable", 1, cf,
 "Enables or disables the drop money module.")
 
-function Death_DropCash(victim, inflictor, attacker)
-	local wallet = victim:getDarkRPVar("money")
+local function DropMoney(ply, amount, posX, posY)
+	if amount == nil then amount = ply:getDarkRPVar("money") end
+	if posX == nil then posX = 0 end
+	if posY == nil then posY = 0 end
+
 	local darkrp_dropmoneypercentage = CVarDropMoneyPercentage:GetFloat()
-	local amount = math.Round(wallet * darkrp_dropmoneypercentage)
-	if (amount > 0) and GetConVar("darkrp_dropmoney_enable"):GetBool() then
-		victim:addMoney(-amount)
-		DarkRP.createMoneyBag((victim:GetPos()+Vector(0, 0, 10)), amount) -- feel as though money would glitch through map at some points, so spawn it higher
+	local realamount = math.Round(amount * darkrp_dropmoneypercentage)
+	if (realamount > 0) and GetConVar("darkrp_dropmoney_enable"):GetBool() then
+		ply:addMoney(-realamount)
+		DarkRP.createMoneyBag((ply:GetPos() + Vector(posX, posY, 10)), realamount) -- spawn at different pos for each money stack
 	end
 end
-hook.Add("PlayerDeath", "Death_DropCash", Death_DropCash)
+
+function Death_DropMoney(victim, inflictor, attacker)
+	if !CVarDropMoneyEnable then return end
+	local divided = victim:getDarkRPVar("money") / 5
+	if divided > 250 then
+		for i = 0, 5 do
+			DropMoney(victim, divided, i, i)
+		end
+	else
+		DropMoney(victim)
+	end
+end
+
+hook.Add("PlayerDeath", "chicagoRP_DeathDropMoney", Death_DropMoney)
 
 --	local amount = math.Round(wallet * GetConVar("darkrp_dropmoney_percentage"):GetFloat())
